@@ -23,3 +23,9 @@ header {
     margin: 0 auto;
     max-width: 64rem;
 }
+
+object {
+    resize: vertical;
+    width: 100%;
+    height: 90%;
+}
