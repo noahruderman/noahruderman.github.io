@@ -1,5 +1,9 @@
 :root {
     color-scheme: light dark;
+    --light-bg-color1: #9ac0ff;
+    --light-bg-color2: #d0e0f0;
+    --dark-bg-color1: #333333;
+    --dark-bg-color2: #000022;
 }
 
 html,
@@ -8,8 +12,8 @@ body {
     margin: 0;
     padding: 0;
     height: 100%;
-    background-image: linear-gradient(135deg, #60a6db 50%, #D0E0F8); /* for legacy clients */
-    background-image: linear-gradient(135deg, light-dark(#60a6db, #371282) 40%, light-dark(#D0E0F8, black));
+    background-color: var(--light-bg-color1);
+    background-image: linear-gradient(135deg, light-dark(var(--light-bg-color1), var(--dark-bg-color1)) 20%, light-dark(var(--light-bg-color2), var(--dark-bg-color2)));
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
