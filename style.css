@@ -18,14 +18,23 @@ body {
     background-attachment: fixed;
 }
 
-h1 {
-    margin: 0;
-}
-
 header {
     position: fixed;
     color: white;
     background-color: rgba(0, 0, 0, 0.8);
+}
+
+h1 {
+    margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: Georgia, serif;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+nav, p, ol, ul, li {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 .page-content {
