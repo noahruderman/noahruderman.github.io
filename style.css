@@ -19,9 +19,20 @@ body {
 }
 
 header {
-    position: fixed;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(128, 128, 128, .3);
+    padding: .5rem 0;
+}
+
+nav {
+    padding: 1rem 0;
+    text-align: center;
+    font-size: 1.25rem;
+}
+nav a {
+    text-decoration: none;
+}
+nav a:hover {
+    text-decoration: underline;
 }
 
 h1, h2, h3, h4, h5, h6 {
