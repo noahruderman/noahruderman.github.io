@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Noah Ruderman's Portfolio">
+        <link rel="stylesheet" href="/style.css">
+        <title>Programming the TI-89</title>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <a href="/">Noah Ruderman</a>
+                |
+                <a href="/about.html">About</a>
+            </nav>
+        </header>
+        <div class="page-content">
+            <h1>Programming the TI-89</h1>
+            <hr>
+            <!-- Background -->
+            <p>
+                One of the first platforms on which I programmed was my TI-83+ Calculator I had at home!
+                After messing around with TI-Basic on the calculator, I switched to using and programming
+                my more advanced TI-89. (and somehow misplacing my TI-83+ along the way :/)
+            </p>
+            <p>
+                I first learned to write on the variant of TI-Basic found on the TI-89, and after not too long,
+                found out about native programming on it.
+                Some amazing people at <a href="http://tigcc.ticalc.org/" target="_blank">TIGCC</a> wrote a GCC port
+                to enable C programs to compile for the TI-89, integrated with the OS's API.
+                This is where I first learned C programming, and the importance of optimization
+                since the calculator has a whopping 256kb of memory and a 10 MHz clock speed!
+            </p>
+
+            <p>Some programs I have written on the TI-89 include</p>
+            <ul>
+                <li><a href="https://github.com/noahruderman/ti-progs/tree/master/fpg" target="_blank">Ray casting playground</a></li>
+                <li><a href="https://github.com/noahruderman/ti-progs/tree/master/filler" target="_blank">Filler</a></li>
+                <li><a href="https://github.com/noahruderman/ti-progs/tree/master/fpg" target="_blank">Ballz (mobile game port)</a></li>
+                <li><a href="https://github.com/noahruderman/ti-progs/tree/master/mandelbrot" target="_blank">Mandelbrot set</a></li>
+                <li><a href="https://github.com/noahruderman/ti-progs/tree/master/barcode" target="_blank">A barcode generator</a></li>
+            </ul>
+
+            <h2>Ray Casting Playground</h2>
+            <hr>
+            <p>
+                Writing this program taught me the most about different optimization techniques.
+                My initial iterations started out taking ~5 seconds to update each frame.
+                By the end, I was able to get it to run at a much smoother ~15fps!
+            </p>
+
+            <h3>The Grayscale Trick</h3>
+            <p>
+                Okay, this one isn't an optimization technique, but rather a trick to get grayscale graphics
+                on screens that only display pixels either on or off.
+                The screen is represented by a 3840 byte region in memory. <!-- footnote here about actual memory? -->
+                On my calculator, the pointer to this region of memory can be programmatically changed.
+                By rapidly switching the display between 2 planes, a 4-color grayscale affect can be observed.
+                It's even possible to get more colors such as 7-8, however this can result in flickering.
+            </p>
+
+            <h3>Fast Drawing</h3>
+            <p>Less is faster.</p>
+            <p>
+                On modern computers, you can draw millions of pixels without seeing any lag at 60+ fps.
+                The TI-89 is far from a modern computer though, having a processor designed in the 1970's.
+                My initial iterations on the ray caster would fill entire rectangles where a ray hit a wall.
+                Replacing this with only drawing the boundaries of walls drastically reduced the number of
+                pixels that needs to be drawn to the screen and reduced computation.
+            </p>
+            <p>
+                Even just drawing lines faster makes a difference in rendering times.
+                Using a fast line drawing routine instead of the routines built into TI's OS proved
+                to significantly speed up rendering.
+            </p>
+
+            <h3>Fixed Point Arithmetic</h3>
+            <p>Integer arithmetic is MUCH faster than floating point arithmetic.</p>
+            <p>
+                Floating point arithmetic require many more operations than simple integers.
+                The processor has to deal with the significand and the exponent in a float,
+                and operations combining them have to take into account different exponents
+                when adding, subtracting, etc.
+            </p>
+            <p>
+                Fixed point arithmetic trades off some of the versatility of floating point
+                in exchange for significantly faster performance.
+                The idea behind fixed point is that we have the decimal <em>point</em> at a <em>fixed</em> location
+                instead of it being able to be in different positions like in <em>floating</em> point.
+            </p>
+            <p>
+                In my original floating point implementation, my grid was represented with floating point,
+                that is walls would take 1x1 unit each, but the player could be located some non-integer coordinate.
+                Porting this to fixed point, I used 16-bit integers, reserving 6 bits for the fractional part and
+                leaving 10 for the whole part.
+                This would allow the player to be located at any of the 2<sup>6</sup> possible x-coordinates
+                and 2<sup>6</sup> y-coordinates within each grid cell.
+                This provides much more precision than perceivable on the tiny 160x100 screen
+                while making the arithmetic much faster.
+            </p>
+            <p>
+                Implementing fixed point requires a bit of work since it is not built-in.
+                My implementation uses 10 bits for the whole number part and 6 bits for the fractional part.
+                This means the range of values is 0 - 2<sup>10</sup>-1 for whole numbers,
+                with the smallest fractional unit being 2<sup>-6</sup>.
+                For example, the integer value <code>1</code> is represented by 1*2<sup>6</sup>,
+                or quickly calculated with <code>1 << 6</code>.
+            </p>
+            <p>Operations on fixed point integers (assuming 6 bit fractional part)</p>
+            <ul>
+                <li>Addition/Subtraction: built-in addition and subtraction works just fine</li>
+                <li>Getting integer part: Right shift 6 bits <code>fp >> 6</code></li>
+                <li>Getting fractional part: Only reading the lowest 6 bits <code>fp & 0b111111</code></li>
+                <li>Multiplication: perform built-in multiplication followed by a right shift of 6 bits
+                    <code>(fp1 * fp2) >> 6</code></li>
+            </ul>
+            <p>
+                ...Aaand for trigonometry, I kinda cheated. Trig functions also require quite a bit of computation,
+                so instead, I used a pre-computed look up table. Since I only needed sin(x) and cos(x), and they
+                are both symmetric and related functions, I stored a table storing angles [0, 90] degrees for sin(x).
+                The rest of the inputs for sin(x) and cos(x) can be calculated using those values.
+                <br>
+                To align with fixed point arithmetic, I precomputed the output of sin(x) times 128 and rounded that
+                to the nearest integer. This allowed me to skip the floating point trig operations all together.
+            </p>
+
+            <!--<h3>Reading key input directly from memory</h3>
+            <p>blazingly fast key input so fast that debouncing may be required</p>-->
+
+            <!-- Potential Write-up on other programs? -->
+        </div>
+    </body>
+</html>
