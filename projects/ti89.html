@@ -102,10 +102,10 @@
             <p>
                 Implementing fixed point requires a bit of work since it is not built-in.
                 My implementation uses 10 bits for the whole number part and 6 bits for the fractional part.
-                This means the range of values is 0 - 2<sup>10</sup>-1 for whole numbers,
+                This means the range of values is [0, 2<sup>10</sup>) for whole numbers,
                 with the smallest fractional unit being 2<sup>-6</sup>.
                 For example, the integer value <code>1</code> is represented by 1*2<sup>6</sup>,
-                or quickly calculated with <code>1 << 6</code>.
+                or quickly calculated with <code>1<<6</code>.
             </p>
             <p>Operations on fixed point integers (assuming 6 bit fractional part)</p>
             <ul>
